@@ -1,136 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generador de Tickets</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-    .product-list { max-width: 600px; margin: auto; text-align: left; }
-    .product-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-    .ticket { border: 1px solid #ccc; width: 300px; margin: auto; padding: 10px; text-align: left; }
-    .button { margin-top: 20px; padding: 10px 15px; cursor: pointer; background-color: #007BFF; color: white; border: none; }
-    .button:disabled { background-color: #ccc; cursor: not-allowed; }
-  </style>
-</head>
-<body>
-  <h1>Generador de Tickets</h1>
-  <div class="product-list">
-    <!-- Lista de productos -->
-    <div id="products"></div>
-  </div>
-  <div class="ticket" id="ticket">
-    <h2>Orden de Compra</h2>
-    <div id="ticketContent">
-      <!-- Aquí se llenará dinámicamente el ticket -->
-    </div>
-    <p><strong>Total: $<span id="total">0.00</span></strong></p>
-  </div>
-  <button class="button" onclick="generateImage()">Generar PNG</button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Generador de Tickets</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 20px;
+            }
+            .product-list {
+                max-width: 600px;
+                margin: auto;
+                text-align: left;
+            }
+            .product-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+            .ticket {
+                border: 1px solid #ccc;
+                width: 500px;
+                margin: auto;
+                padding: 10px;
+                text-align: left;
+            }
+            .ticket table {
+                width: 100%; /* Ocupa todo el contenedor de 500px */
+                border-collapse: collapse;
+                table-layout: fixed; /* Ajusta automáticamente las celdas */
+            }
+            .ticket th,
+            .ticket td {
+                padding: 5px;
+                word-wrap: break-word; /* Divide palabras largas */
+            }
+            .ticket th {
+                background-color: #f2f2f2;
+                border-bottom: 1px solid #ccc;
+            }
+            .ticket tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
 
-  <script>
-    // Lista de productos y precios
-    const productsData = [
-      { name: "Benson Crystal Violet", price: 63 },
-      { name: "Camel", price: 68 },
-      { name: "Camel Pera", price: 63 },
-      { name: "Link Azul 20'", price: 25 },
-      { name: "Link Negro 20'", price: 25 },
-      { name: "Link Rojo 20'", price: 25 },
-      { name: "Marlboro Rojo 20'", price: 72 },
-      { name: "Marlboro Chester", price: 62 },
-      { name: "Marlboro Mentolado", price: 72 },
-      { name: "Marlboro Clavo", price: 73 },
-      { name: "Marlboro Chicle", price: 66 },
-      { name: "Marlboro Guayaba", price: 66 },
-      { name: "Marlboro Mora", price: 66 },
-      { name: "Marlboro Sandía", price: 66 },
-      { name: "Marlboro Durazno", price: 66 },
-      { name: "Marlboro Ruby", price: 72 },
-      { name: "Pall Mall Alaska", price: 66 },
-      { name: "Pall Mall Pepino", price: 66 },
-      { name: "Pall Mall Cereza", price: 66 },
-      { name: "Pall Mall Platano", price: 66 },
-      { name: "Pall Mall Iceland", price: 35 },
-      { name: "Shots 14'", price: 26.5 },
-      { name: "Shots 20'", price: 38 },
-      { name: "Shots 25'", price: 42.5 },
-    ];
+            .ticket th:first-child,
+            .ticket td:first-child {
+                /* Primera columna (Producto) */
+                width: 50%; /* 50% del ancho total */
+            }
 
-    // Función para renderizar la lista de productos
-    function renderProductList() {
-      const productsContainer = document.getElementById("products");
-      productsData.forEach((product, index) => {
-        const row = document.createElement("div");
-        row.className = "product-row";
-        row.innerHTML = `
+            .ticket th:nth-child(2),
+            .ticket td:nth-child(2) {
+                /* Segunda columna (Precio) */
+                width: 15%; /* 15% del ancho total */
+                text-align: right; /* Alinear texto a la derecha */
+            }
+
+            .ticket th:nth-child(3),
+            .ticket td:nth-child(3) {
+                /* Tercera columna (Cantidad) */
+                width: 15%; /* 15% del ancho total */
+                text-align: center; /* Centrar texto */
+            }
+
+            .ticket th:nth-child(4),
+            .ticket td:nth-child(4) {
+                /* Cuarta columna (Subtotal) */
+                width: 20%; /* 20% del ancho total */
+                text-align: right; /* Alinear texto a la derecha */
+            }
+            .button {
+                margin-top: 20px;
+                padding: 10px 15px;
+                cursor: pointer;
+                background-color: #007bff;
+                color: white;
+                border: none;
+            }
+            .button:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Generador de Tickets</h1>
+        <div class="product-list">
+            <!-- Lista de productos -->
+            <div id="products"></div>
+        </div>
+        <div class="ticket" id="ticket">
+            <h2>Orden de Compra</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th style="text-align: right">Precio</th>
+                        <th style="text-align: center">Cantidad</th>
+                        <th style="text-align: right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketContent">
+                    <!-- Aquí se llenará dinámicamente el contenido -->
+                </tbody>
+            </table>
+            <p>
+                <strong>Total: $<span id="total">0.00</span></strong>
+            </p>
+        </div>
+        <button class="button" onclick="generateImage()">Generar PNG</button>
+
+        <script>
+            // Lista de productos y precios
+            const productsData = [
+                { name: "Benson Crystal Violet", price: 63 },
+                { name: "Camel", price: 68 },
+                { name: "Camel Pera", price: 63 },
+                { name: "Link Azul 20'", price: 25 },
+                { name: "Link Negro 20'", price: 25 },
+                { name: "Link Rojo 20'", price: 25 },
+                { name: "Marlboro Rojo 20'", price: 72 },
+                { name: "Marlboro Chester", price: 62 },
+                { name: "Marlboro Mentolado", price: 72 },
+                { name: "Marlboro Clavo", price: 73 },
+                { name: "Marlboro Chicle", price: 66 },
+                { name: "Marlboro Guayaba", price: 66 },
+                { name: "Marlboro Mora", price: 66 },
+                { name: "Marlboro Sandía", price: 66 },
+                { name: "Marlboro Durazno", price: 66 },
+                { name: "Marlboro Ruby", price: 72 },
+                { name: "Pall Mall Alaska", price: 66 },
+                { name: "Pall Mall Pepino", price: 66 },
+                { name: "Pall Mall Cereza", price: 66 },
+                { name: "Pall Mall Platano", price: 66 },
+                { name: "Pall Mall Iceland", price: 35 },
+                { name: "Shots 14'", price: 26.5 },
+                { name: "Shots 20'", price: 38 },
+                { name: "Shots 25'", price: 42.5 },
+            ];
+
+            // Función para renderizar la lista de productos
+            function renderProductList() {
+                const productsContainer = document.getElementById("products");
+                productsData.forEach((product, index) => {
+                    const row = document.createElement("div");
+                    row.className = "product-row";
+                    row.innerHTML = `
           <span>${product.name} ($${product.price})</span>
-          <input type="number" min="0" value="0" onchange="updateTicket(${index}, this.value)" style="width: 60px;">
+          <select onchange="updateTicket(${index}, this.value)" style="width: 80px;">
+            <option value="0">0</option>
+            ${Array.from(
+                { length: 50 },
+                (_, i) => `<option value="${i + 1}">${i + 1}</option>`
+            ).join("")}
+          </select>
         `;
-        productsContainer.appendChild(row);
-      });
-    }
+                    productsContainer.appendChild(row);
+                });
+            }
 
-    // Variables para almacenar los datos del ticket
-    const ticketProducts = [];
+            // Variables para almacenar los datos del ticket
+            const ticketProducts = [];
 
-    // Función para actualizar el ticket
-    function updateTicket(index, quantity) {
-      const product = productsData[index];
-      const existingProduct = ticketProducts.find(p => p.name === product.name);
+            // Función para actualizar el ticket
+            function updateTicket(index, quantity) {
+                const product = productsData[index];
+                const existingProduct = ticketProducts.find(
+                    (p) => p.name === product.name
+                );
 
-      if (quantity > 0) {
-        const subtotal = quantity * product.price;
-        if (existingProduct) {
-          existingProduct.quantity = quantity;
-          existingProduct.subtotal = subtotal;
-        } else {
-          ticketProducts.push({ ...product, quantity, subtotal });
-        }
-      } else {
-        const productIndex = ticketProducts.findIndex(p => p.name === product.name);
-        if (productIndex !== -1) ticketProducts.splice(productIndex, 1);
-      }
+                if (quantity > 0) {
+                    const subtotal = quantity * product.price;
+                    if (existingProduct) {
+                        existingProduct.quantity = quantity;
+                        existingProduct.subtotal = subtotal;
+                    } else {
+                        ticketProducts.push({ ...product, quantity, subtotal });
+                    }
+                } else {
+                    const productIndex = ticketProducts.findIndex(
+                        (p) => p.name === product.name
+                    );
+                    if (productIndex !== -1)
+                        ticketProducts.splice(productIndex, 1);
+                }
 
-      renderTicket();
-    }
+                renderTicket();
+            }
 
-    // Función para renderizar el ticket
-    function renderTicket() {
-      const ticketContent = document.getElementById("ticketContent");
-      const totalElement = document.getElementById("total");
-      ticketContent.innerHTML = "";
-      let total = 0;
+            // Función para renderizar el ticket
+            function renderTicket() {
+                const ticketContent = document.getElementById("ticketContent");
+                const totalElement = document.getElementById("total");
+                ticketContent.innerHTML = ""; // Limpiamos el contenido anterior
+                let total = 0;
 
-      ticketProducts.forEach(product => {
-        total += product.subtotal;
-        ticketContent.innerHTML += `
-          <p>${product.name}: ${product.quantity} x $${product.price} = $${product.subtotal.toFixed(2)}</p>
+                // Generar filas para cada producto con cantidad mayor a 0
+                ticketProducts.forEach((product) => {
+                    total += product.subtotal;
+                    ticketContent.innerHTML += `
+          <tr>
+            <td>${product.name}</td>
+            <td style="text-align: right;">$${product.price.toFixed(2)}</td>
+            <td style="text-align: center;">${product.quantity}</td>
+            <td style="text-align: right;">$${product.subtotal.toFixed(2)}</td>
+          </tr>
         `;
-      });
+                });
 
-      totalElement.textContent = total.toFixed(2);
-    }
+                // Actualizar el total
+                totalElement.textContent = total.toFixed(2);
+            }
 
-    // Función para generar la imagen del ticket
-    function generateImage() {
-  const ticket = document.getElementById("ticket");
-  
-  // Configuración de html2canvas para aumentar la resolución
-  html2canvas(ticket, {
-    scale: 3, // Aumenta la escala (puedes ajustar el valor según lo necesites)
-    useCORS: true // Para evitar problemas si usas recursos externos
-  }).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "ticket.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  });
-}
+            // Función para generar la imagen del ticket
+            function generateImage() {
+                const ticket = document.getElementById("ticket");
 
-    // Renderizar la lista de productos al cargar la página
-    renderProductList();
-  </script>
-</body>
+                html2canvas(ticket, {
+                    scale: 3, // Escala para mejorar la resolución
+                    useCORS: true,
+                }).then((canvas) => {
+                    const link = document.createElement("a");
+                    link.download = "ticket.png";
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                });
+            }
+
+            // Renderizar la lista de productos al cargar la página
+            renderProductList();
+        </script>
+    </body>
 </html>
+
