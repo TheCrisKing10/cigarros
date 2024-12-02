@@ -10,10 +10,6 @@
     .product-list { max-width: 600px; margin: auto; text-align: left; }
     .product-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
     .ticket { border: 1px solid #ccc; width: 300px; margin: auto; padding: 10px; text-align: left; }
-    .ticket table { width: 100%; border-collapse: collapse; text-align: left; }
-    .ticket th, .ticket td { padding: 5px; }
-    .ticket th { background-color: #f2f2f2; border-bottom: 1px solid #ccc; }
-    .ticket tr:nth-child(even) { background-color: #fff2e6; }
     .button { margin-top: 20px; padding: 10px 15px; cursor: pointer; background-color: #007BFF; color: white; border: none; }
     .button:disabled { background-color: #ccc; cursor: not-allowed; }
   </style>
@@ -26,19 +22,9 @@
   </div>
   <div class="ticket" id="ticket">
     <h2>Orden de Compra</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th style="text-align: right;">Precio</th>
-          <th style="text-align: center;">Cantidad</th>
-          <th style="text-align: right;">Subtotal</th>
-        </tr>
-      </thead>
-      <tbody id="ticketContent">
-        <!-- Aquí se llenará dinámicamente el contenido -->
-      </tbody>
-    </table>
+    <div id="ticketContent">
+      <!-- Aquí se llenará dinámicamente el ticket -->
+    </div>
     <p><strong>Total: $<span id="total">0.00</span></strong></p>
   </div>
   <button class="button" onclick="generateImage()">Generar PNG</button>
@@ -114,40 +100,34 @@
     function renderTicket() {
       const ticketContent = document.getElementById("ticketContent");
       const totalElement = document.getElementById("total");
-      ticketContent.innerHTML = ""; // Limpiamos el contenido anterior
+      ticketContent.innerHTML = "";
       let total = 0;
 
-      // Generar filas para cada producto con cantidad mayor a 0
       ticketProducts.forEach(product => {
         total += product.subtotal;
         ticketContent.innerHTML += `
-          <tr>
-            <td>${product.name}</td>
-            <td style="text-align: right;">$${product.price.toFixed(2)}</td>
-            <td style="text-align: center;">${product.quantity}</td>
-            <td style="text-align: right;">$${product.subtotal.toFixed(2)}</td>
-          </tr>
+          <p>${product.name}: ${product.quantity} x $${product.price} = $${product.subtotal.toFixed(2)}</p>
         `;
       });
 
-      // Actualizar el total
       totalElement.textContent = total.toFixed(2);
     }
 
     // Función para generar la imagen del ticket
     function generateImage() {
-      const ticket = document.getElementById("ticket");
-      
-      html2canvas(ticket, {
-        scale: 3, // Escala para mejorar la resolución
-        useCORS: true
-      }).then(canvas => {
-        const link = document.createElement("a");
-        link.download = "ticket.png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      });
-    }
+  const ticket = document.getElementById("ticket");
+  
+  // Configuración de html2canvas para aumentar la resolución
+  html2canvas(ticket, {
+    scale: 3, // Aumenta la escala (puedes ajustar el valor según lo necesites)
+    useCORS: true // Para evitar problemas si usas recursos externos
+  }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "ticket.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
 
     // Renderizar la lista de productos al cargar la página
     renderProductList();
