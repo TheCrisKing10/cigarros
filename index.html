@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cigarros Jazmín</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <h1 class="header__title">CIGARROS JAZMÍN</h1>
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Buscar productos...">
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section id="products" class="products-grid"></section>
+        
+        <aside class="cart-container">
+            <h2 class="cart__title">Carrito de Compras</h2>
+            <div id="cart-items" class="cart-items"></div>
+            <div class="cart-summary">
+                <p>Subtotal: <span id="subtotal"> $0.00</span></p>
+                <p class="total">Total: <span id="total"> $0.00</span></p>
+            </div>
+            <button id="checkout-btn" class="checkout-btn">Finalizar Compra</button>
+        </aside>
+    </main>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
