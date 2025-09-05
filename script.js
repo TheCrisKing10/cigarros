@@ -34,7 +34,6 @@ let cart = [];
 
 const productsContainer = document.getElementById('products');
 const cartItemsContainer = document.getElementById('cart-items');
-const subtotalElement = document.getElementById('subtotal');
 const totalElement = document.getElementById('total');
 const searchInput = document.getElementById('search-input');
 const checkoutBtn = document.getElementById('checkout-btn');
@@ -55,7 +54,7 @@ function renderProducts(filteredProducts) {
     filteredProducts.forEach(product => {
         const cartItem = cart.find(item => item.id === product.id);
         const quantity = cartItem ? cartItem.quantity : 0;
-        const pricePerPiece = product.price * product.piecesPerPackage;
+        const pricePerPiece = product.price / product.piecesPerPackage;
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         productCard.innerHTML = `
@@ -63,7 +62,7 @@ function renderProducts(filteredProducts) {
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-price">$${formatPrice(product.price)}</p>
-                ${product.piecesPerPackage > 1 ? `<p class="price-per-piece">$${formatPrice(pricePerPiece)} / paquete</p>` : ''}
+                ${product.piecesPerPackage > 1 ? `<p class="price-per-piece">$${formatPrice(pricePerPiece)} / pieza</p>` : ''}
                 <div class="quantity-control-product" data-id="${product.id}">
                     <button class="quantity-btn decrease" data-id="${product.id}">-</button>
                     <span class="quantity" data-id="${product.id}">${quantity}</span>
@@ -78,14 +77,13 @@ function renderProducts(filteredProducts) {
 // Renderiza los items del carrito
 function renderCart() {
     cartItemsContainer.innerHTML = '';
-    let subtotal = 0;
+    let total = 0;
 
     // Ordena el carrito por ID de forma ascendente
     const sortedCart = cart.sort((a, b) => a.id - b.id);
 
     if (sortedCart.length === 0) {
         cartItemsContainer.innerHTML = '<p style="text-align: center; color: #666;">Tu carrito está vacío.</p>';
-        subtotalElement.textContent = '$0,00';
         totalElement.textContent = '$0,00';
         return;
     }
@@ -109,12 +107,11 @@ function renderCart() {
             <button class="remove-item-btn" data-id="${item.id}">X</button>
         `;
         cartItemsContainer.appendChild(cartItem);
-        subtotal += item.price * item.quantity;
+        total += item.price * item.quantity;
     });
 
-    // Actualiza los totales en tiempo real
-    subtotalElement.textContent = `$${formatPrice(subtotal)}`;
-    totalElement.textContent = `$${formatPrice(subtotal)}`;
+    // Solo mostramos el total
+    totalElement.textContent = `$${formatPrice(total)}`;
 }
 
 // Lógica del carrito de compras
@@ -166,7 +163,7 @@ function generateTicket() {
 
     const ticketContainer = document.createElement('div');
     ticketContainer.classList.add('ticket-style');
-    ticketContainer.style.width = '350px'; /* 300px el predeterminado */
+    ticketContainer.style.width = '350px'; /* 300px ES EL PREDETERMINADO */
     ticketContainer.style.padding = '1rem';
     ticketContainer.style.fontFamily = 'monospace';
     ticketContainer.style.backgroundColor = '#fff';
@@ -194,19 +191,20 @@ function generateTicket() {
             `).join('')}
         </div>
         <div style="border-top: 1px dashed #000; margin-top: 1rem; padding-top: 1rem;">
-            <p style="display: flex; justify-content: space-between; font-weight: bold;"><span>Subtotal:</span><span>${subtotalElement.textContent}</span></p>
-            <p style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem;"><span>Total:</span><span>${totalElement.textContent}</span></p>
+            <p style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem;">
+                <span>Total:</span><span>${totalElement.textContent}</span>
+            </p>
         </div>
         <p style="text-align: center; margin-top: 1rem; font-size: 0.8rem;">¡Gracias por tu compra!</p>
     `;
     ticketContainer.innerHTML = ticketContent;
     document.body.appendChild(ticketContainer);
 
-    html2canvas(ticketContainer, { scale: 2 }).then(canvas => {
+    html2canvas(ticketContainer, { scale: 3 }).then(canvas => {
         const image = canvas.toDataURL('image/png', 1.0);
         const link = document.createElement('a');
         link.href = image;
-        link.download = 'ticket_de_compra.png';
+        link.download = 'ticket_cigarros.png';
         link.click();
         document.body.removeChild(ticketContainer);
     });
